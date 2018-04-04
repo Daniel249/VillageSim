@@ -7,7 +7,8 @@ namespace EconSim
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            Simulation Sim = new Simulation(Enum.GetNames(typeof(Profession)).Length);
+            Simulation Sim = new Simulation(100);
+            Console.Read();
         }
     }
 }

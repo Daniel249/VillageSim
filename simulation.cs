@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Diagnostics;
 
 class Simulation {
 
@@ -45,6 +46,40 @@ class Simulation {
         }
     }
 
+    void initPopulation(int ammountPerProf) {
+        int counter = 0;
+
+        for(int i = 0; i < profAmmount; i++) {
+            Type type = null;
+            try {
+                // cast the current proffesion
+                Profession prof = (Profession)i;
+                // cast it to type
+                type = Type.GetType(prof.ToString());
+            } catch(Exception e) {
+                Console.WriteLine("Error: Could not cast Profession");
+                Console.WriteLine("Log: Happened in {0}-ava Profession",i);
+                Console.WriteLine(e);
+            }
+
+            for(int j = 0; j < ammountPerProf; j++) {
+                try {
+                    var temp = Activator.CreateInstance(type);
+                    Population[counter] = (Person)temp;
+                } catch (Exception e) {
+                    Console.WriteLine("Error: Could not initialize Person from type");
+                    Console.WriteLine(e);
+                }
+                counter++;
+            }
+
+            // test
+            Console.WriteLine(type.ToString() + "\t" + stopwatch.Elapsed.TotalMilliseconds.ToString());
+            stopwatch.Restart();
+
+        }
+    }
+
 
     // constructor
     public Simulation(params int[] ammountPerProf) {
@@ -54,5 +89,21 @@ class Simulation {
         Population = new Person[ammountPerProf.Sum()];
         // use inputs to initilize population
         initPopulation(ammountPerProf);
+    }
+    // test
+    Stopwatch stopwatch;
+    public Simulation(int ammountPerProf) {
+        // get professions from enum at compile
+        profAmmount = Enum.GetNames(typeof(Profession)).Length;
+        
+        Population = new Person[ammountPerProf*profAmmount];
+        stopwatch = new Stopwatch();
+        
+        // test
+        stopwatch.Start();
+
+        initPopulation(ammountPerProf);
+
+
     }
 }
