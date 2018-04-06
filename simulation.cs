@@ -10,6 +10,21 @@ class Simulation {
     // references to Persons
     public Person[][] Population { get; private set; }
 
+    // market
+    public Market market { get; private set; }
+
+
+    public bool continueSim { get; set; }
+    public void run() {
+        continueSim = true;
+        while(continueSim) {
+            turn();
+        }
+    }
+
+    public void turn() {
+
+    }
 
 
     // initialize Persons in array
@@ -18,8 +33,6 @@ class Simulation {
             initProfession(i, ammountPerProf);
         }
     }
-
-
 
     void initProfession(int professionID, int Ammount) {
         Stopwatch stopwatch = new Stopwatch();
@@ -60,7 +73,12 @@ class Simulation {
         Population = new Person[profAmmount][];
 
         initPopulation(ammountPerProf);
+        market = new Market(profAmmount);
+
+        SimInstance = this;
     }
+    // singleton reference
+    public static Simulation SimInstance { get; private set; }
 
 
 
