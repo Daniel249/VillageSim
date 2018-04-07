@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 // using System.Linq;
 using System.Diagnostics;
 
@@ -8,7 +9,8 @@ class Simulation {
     public int profAmmount { get; private set; }
 
     // references to Persons
-    public Person[][] Population { get; private set; }
+    public HashSet<Person> Population { get; private set; }
+    public HashSet<Person>[] Demographics { get; private set; }
 
     // market
     public Market market { get; private set; }
@@ -30,6 +32,9 @@ class Simulation {
     // initialize Persons in array
     void initPopulation(int ammountPerProf) {
         for(int i = 0; i < profAmmount; i++) {
+            Demographics[i] = new HashSet<Person>();
+        }
+        for(int i = 0; i < profAmmount; i++) {
             initProfession(i, ammountPerProf);
         }
     }
@@ -49,18 +54,17 @@ class Simulation {
             Console.WriteLine(e);
         }
 
-        Person[] newDemographic = new Person[Ammount];
 
         for(int j = 0; j < Ammount; j++) {
             try {
-                var temp = Activator.CreateInstance(type);
-                newDemographic[j] = (Person)temp;
+                Person temp = (Person)Activator.CreateInstance(type);
+                Population.Add(temp);
+                Demographics[professionID].Add(temp);
             } catch (Exception e) {
                 Console.WriteLine("Error: Could not initialize Person from type");
                 Console.WriteLine(e);
             }
         }
-        Population[professionID] = newDemographic;
 
         // test
         Console.WriteLine(type.ToString() + "\t" + stopwatch.Elapsed.TotalMilliseconds.ToString());
@@ -69,13 +73,14 @@ class Simulation {
     public Simulation(int ammountPerProf) {
         // get professions from enum at compile
         profAmmount = Enum.GetNames(typeof(Profession)).Length;
+        SimInstance = this;
         
-        Population = new Person[profAmmount][];
+        Population = new HashSet<Person>();
+        Demographics = new HashSet<Person>[profAmmount];
 
         initPopulation(ammountPerProf);
         market = new Market(profAmmount);
 
-        SimInstance = this;
     }
     // singleton reference
     public static Simulation SimInstance { get; private set; }
@@ -90,7 +95,8 @@ class Simulation {
         // get professions from enum at compile
         profAmmount = Enum.GetNames(typeof(Profession)).Length;
         // add inputs and initialize array
-        Population = new Person[profAmmount][];
+        Population = new HashSet<Person>();
+        Demographics = new HashSet<Person>[profAmmount];
         // use inputs to initilize population
         initPopulation(ammountPerProf);
     }
