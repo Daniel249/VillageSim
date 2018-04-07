@@ -20,6 +20,8 @@ class Person {
         Inventory[resourceID] += resourceAmmount;
         Cash += cash;
     }
+
+
     // methods
 
     // main method
@@ -44,11 +46,6 @@ class Person {
     // constructor
     protected Person(Profession prof) {
         Role = (int)prof;
-        //Inventory = new decimal[]
+        Inventory = new int[Simulation.SimInstance.profAmmount];
     }
-}
-
-struct Adress {
-    int ID;
-    int Role;
 }
