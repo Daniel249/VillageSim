@@ -1,6 +1,18 @@
-
+using System;
 class Offer {
-    public int SellerID { get; private set; }
+    // weakreference to Seller. cannot be set
+    private WeakReference<Person> _seller;
+    public Person Seller {
+        get {
+            Person seller;
+            // maybe do something if false
+            _seller.TryGetTarget(out seller);
+            return seller;
+        }
+        set {
+            throw new NotSupportedException();
+        }
+    }
     public int AmmountResource { get; private set; }
     public decimal Price { get; private set; }
 
@@ -9,25 +21,17 @@ class Offer {
     public Offer nextOffer;
 
 
-    // -1: Price already off
-    // 0: ammount to big, keep search
-    // 1: Match
-    public int checkMatch(int maxAmmount, int maxPrice) {
-        // stop search if already off price
-        if(maxPrice < Price) {
-            return -1;
-        }
-        if(maxAmmount < AmmountResource) {
-            return 0;
-        }
-        // match both price and ammount
-        return 1;
+
+
+    // consume available ResourceAmmount
+    public void consumeOffer(int consumed) {
+        AmmountResource -= consumed;
     }
 
 
     // constructor
-    public Offer(int _sellerID, int _ammountResource, decimal _price) {
-        SellerID = _sellerID;
+    public Offer(Person seller, int _ammountResource, decimal _price) {
+        _seller = new WeakReference<Person>(seller);
         AmmountResource= _ammountResource;
         Price = _price;
     }
