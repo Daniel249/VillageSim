@@ -1,9 +1,16 @@
 using System;
 class OrderBook {
-    public Offer HeadNode;
+    public Offer HeadNode { get; private set; }
+    public int OfferAmmount { get; private set; }
+
+    public void deleteLowestOffer() {
+        HeadNode = HeadNode.nextOffer;
+        OfferAmmount--;
+    }
 
     // place offer in node list
     public void addOffer(Offer newBid) {
+        OfferAmmount++;
         // Headnode check
         if(HeadNode == null || newBid.Price < HeadNode.Price) {
             newBid.nextOffer = HeadNode;
@@ -24,46 +31,23 @@ class OrderBook {
                 }
             }
         }
+        CutBook();
     }
-    public Offer scanOffer(int maxAmmount, int maxPrice) {
-        // Headnode check
-        int num = HeadNode.checkMatch(maxAmmount, maxPrice);
 
-        if(num == -1) {
-            return null;
-        } else if(num == 1) {
-            Offer tempOffer = HeadNode;
-            HeadNode = HeadNode.nextOffer;
-            return tempOffer;
-        } else if(num == 0) {
-        // loop check
-            Offer currentNode = HeadNode;
 
-            while(currentNode.nextOffer != null) {
-                int mun = currentNode.nextOffer.checkMatch(maxAmmount, maxPrice);
-                if(mun == -1) {
-                    return null;
-                } else if(mun == 1) {
-                    Offer tempOffer = currentNode.nextOffer;
-                    currentNode.nextOffer = currentNode.nextOffer.nextOffer;
-                    return tempOffer;
-                } else if(mun == 0) {
-                    currentNode = currentNode.nextOffer;
-                } else {
-                    Console.WriteLine("Error on Offers scan: Match check on offer returns invalid Enum");
-                    return null;
-                }
+
+    static int maxSize = 6000;
+    // if OfferAmmount surpasses maxSize, cut size to maxSize/2
+    void CutBook() {
+        if(OfferAmmount > maxSize) {
+            Offer currentOffer = HeadNode;
+            for(int i = 0; i < maxSize/2; i++) {
+                currentOffer = currentOffer.nextOffer;
             }
-            // if HeadNode.next == null. it wont (while) loop
-            return null;
-
-        } else {
-            Console.WriteLine("Error on Offers scan: Match check on offer returns invalid Enum");
-            return null;
+            currentOffer.nextOffer = null;
+            OfferAmmount = maxSize/2 + 1;
         }
     }
-
-
 
     // constructor
     public OrderBook() {
