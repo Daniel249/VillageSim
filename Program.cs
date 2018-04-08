@@ -17,7 +17,7 @@ namespace EconSim
             foreach(Person p in Sim.Population) {
                 int rand = rnd.Next(1,30);
                 int randAmmount = rnd.Next(1,10);
-                Sim.market.placeOffer(p,(int)p.Role,randAmmount,rand);
+                Sim.Markets[(int)p.Role].placeOffer(p,randAmmount,rand);
             }
             // Console.WriteLine(GC.GetTotalMemory(true));
             // Offer a = Sim.market.searchOffer(2,1,3,10);

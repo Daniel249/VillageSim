@@ -13,7 +13,7 @@ class Simulation {
     public HashSet<Person>[] Demographics { get; private set; }
 
     // market
-    public Market market { get; private set; }
+    public Market[] Markets { get; private set; }
 
 
     public bool continueSim { get; set; }
@@ -56,11 +56,15 @@ class Simulation {
     // potential to run foreach(demo d in demografics) {foreach Person p in d }
 
     public void turn() {
-        market.StartTimeSpan();
+        for(int i = 0; i < Markets.Length; i++) {
+            Markets[i].StartTimeSpan();
+        }
         foreach(Person p in Population) {
             p.turn();
         }
-        market.EndTimeSpan();
+        for(int i = 0; i < Markets.Length; i++) {
+            Markets[i].EndTimeSpan();
+        }
     }
 
 
@@ -142,7 +146,10 @@ class Simulation {
         Demographics = new HashSet<Person>[profAmmount];
 
         initPopulation(ammountPerProf);
-        market = new Market(profAmmount);
+        Markets = new Market[profAmmount];
+        for(int i = 0; i < profAmmount; i++) {
+            Markets[i] = new Market(profAmmount);
+        }
 
     }
 

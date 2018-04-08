@@ -1,43 +1,42 @@
 using System;
 using System.Collections.Generic;
 class Market {
-    OrderBook[] Orderbooks;
-    public List<TimeSpan>[] Logs { get; private set; }
-    public TimeSpan[] CurrentLogs { get; private set; } 
+    OrderBook Orderbook;
+    public List<TimeSpan> Logs { get; private set; }
+    public TimeSpan CurrentLog { get; private set; } 
 
     // NOTE: resourceID is used to place the offer on the respective orderbook
 
-    public void placeOffer(Person Seller, int resourceID, int Ammount, decimal Price) {
+    public void placeOffer(Person Seller, int Ammount, decimal Price) {
         Offer newOffer = new Offer(Seller, Ammount, Price);
-        Orderbooks[resourceID].addOffer(newOffer);
+        Orderbook.addOffer(newOffer);
     }
 
 
     // TODO return enum. completed/partially completed/not completed
     public int searchOffer(Person buyer, int resourceID, int buyAmmount, int maxPrice) {
-        OrderBook book = Orderbooks[resourceID];
-        decimal price = book.HeadNode.Price;
+        decimal price = Orderbook.HeadNode.Price;
 
-        while(buyAmmount > 0 && price <= maxPrice && book.HeadNode != null) {
-            int offerAmmount = book.HeadNode.AmmountResource;
+        while(buyAmmount > 0 && price <= maxPrice && Orderbook.HeadNode != null) {
+            int offerAmmount = Orderbook.HeadNode.AmmountResource;
             int transAmmount;
-            Person seller = book.HeadNode.Seller;
+            Person seller = Orderbook.HeadNode.Seller;
 
             if(offerAmmount < buyAmmount) {
                 transAmmount = offerAmmount;
                 buyAmmount -= offerAmmount;
-                book.deleteLowestOffer();
+                Orderbook.deleteLowestOffer();
             } else {
                 transAmmount = buyAmmount;
                 buyAmmount = 0;
-                book.HeadNode.consumeOffer(buyAmmount);
+                Orderbook.HeadNode.consumeOffer(buyAmmount);
             }
 
             decimal totalCost = price*transAmmount;
             buyer.Transaction((-1)*totalCost, resourceID, transAmmount);
             seller.Transaction(totalCost, resourceID, transAmmount);
 
-            CurrentLogs[resourceID].LogTransaction(price, transAmmount);
+            CurrentLog.LogTransaction(price, transAmmount);
         }
         if(buyAmmount == 0) {
             // completed
@@ -45,7 +44,7 @@ class Market {
         } else if(price > maxPrice) {
             // partially completed
             return 1;
-        } else if(book.HeadNode == null) {
+        } else if(Orderbook.HeadNode == null) {
             // ran out of book
             return 2;
         } else {
@@ -55,30 +54,19 @@ class Market {
 
     // place all current logs in their respective logs
     public void EndTimeSpan() {
-        for(int i = 0; i < CurrentLogs.Length; i++) {
-            Logs[i].Add(CurrentLogs[i]);
-            CurrentLogs[i] = null;
-        }
+        Logs.Add(CurrentLog);
+        CurrentLog = null;
     }
     public void StartTimeSpan() {
-        for(int i = 0; i < CurrentLogs.Length; i++) {
-            CurrentLogs[i] = new TimeSpan();
-        }
+        CurrentLog = new TimeSpan();
     }
 
     // constructor
     public Market(int resourceAmmount) {
-        Orderbooks = new OrderBook[resourceAmmount];
-        for(int i = 0; i < resourceAmmount; i++) {
-            Orderbooks[i] = new OrderBook();
-        }
-        // initialize array of currents
-        CurrentLogs = new TimeSpan[resourceAmmount];
-        // initialize array of lists 
-        Logs = new List<TimeSpan>[resourceAmmount];
-        // initialize lists
-        for(int i = 0; i < resourceAmmount; i++) {
-            Logs[i] = new List<TimeSpan>();
-        }
+        // initialize orderbook
+        Orderbook = new OrderBook();
+        // initialize log
+        Logs = new List<TimeSpan>();
+
     }
 }
