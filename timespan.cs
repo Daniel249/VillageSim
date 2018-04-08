@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 class TimeSpan {
-    public static List<TimeSpan> Logs { get; private set; }
 
     // TimeSpan stats
 
@@ -17,24 +16,27 @@ class TimeSpan {
     public int Volume { get; private set; }
 
 
-    public static void LogTransaction(decimal price, int volume) {
-        TimeSpan current = Logs.LastOrDefault();
+    public void LogTransaction(decimal price, int volume) {
 
-        // Log price
-        if(price > current.High) {
-            current.High = price;
+        // Log open close
+        if(Open == 0) {
+            Open = price;
         }
-        if(price < current.Low) {
-            current.Low = price;
+        Close = price;
+        // Log high low
+        if(price > High) {
+            High = price;
+        }
+        if(price < Low) {
+            Low = price;
         }
         // Log volume
-        current.Volume += volume;
+        Volume += volume;
     }
 
 
-    
     // constructor
-    public TimeSpan(int open) {
-        Open = open;
+    public TimeSpan() {
+
     }
 }

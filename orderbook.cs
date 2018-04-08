@@ -49,8 +49,10 @@ class OrderBook {
         }
     }
 
+
     // constructor
     public OrderBook() {
         HeadNode = null;
+        OfferAmmount = 0;
     }
 }
