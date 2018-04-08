@@ -1,9 +1,10 @@
-  
-class Person {
+using System;
+
+abstract class Person {
 
     // profession
     // main product location in inventory
-    public int Role { get; private set; }
+    public abstract Profession Role { get; }
 
     // Inventory
     public int[] Inventory { get; private set; }
@@ -11,11 +12,7 @@ class Person {
     // Currency
     public decimal Cash { get; private set; }
 
-    // set inventory
-    public void setInventory(int[] _inventory) {
-        Inventory = _inventory;
-    }
-
+    // close deal
     public void Transaction(decimal cash, int resourceID, int resourceAmmount) {
         Inventory[resourceID] += resourceAmmount;
         Cash += cash;
@@ -26,26 +23,32 @@ class Person {
 
     // main method
     public void turn() {
-
+        work();
+        considerSell();
+        considerBuy();
     }
 
     // override by inherited classes
-    protected virtual void work() {
-
-    }
+    public abstract void work();
     
-    void considerSell(int resourceID, int ammount, int price) {
+
+    // sell logic
+    void considerSell() {
         // check inventory and role. think and then sell
     }
 
-    void considerBuy(int resourceID, int ammount, int price) {
+    // buy logic
+    protected virtual void considerBuy() {
 
     }
 
+    // set inventory. on respawn only
+    public void setInventory(int[] _inventory) {
+        Inventory = _inventory;
+    }
 
     // constructor
-    protected Person(Profession prof) {
-        Role = (int)prof;
+    protected Person() {
         Inventory = new int[Simulation.SimInstance.profAmmount];
     }
 }
