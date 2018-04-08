@@ -17,15 +17,50 @@ class Simulation {
 
 
     public bool continueSim { get; set; }
+    public bool nonStop { get; set; }
+    bool nextCycle = false;
     public void run() {
+        Stopwatch watch = new Stopwatch();
         continueSim = true;
+        nonStop = false;
+
         while(continueSim) {
-            turn();
+            if(Console.KeyAvailable) {
+                processKey(Console.ReadKey(true));
+            }
+            if(nonStop) {
+                nextCycle = true;
+            }
+            // reset nextCycle before turn and sleep
+            // so that it wont be overturned
+            if(nextCycle) {
+                nextCycle = false;
+                Console.WriteLine("turn");
+                turn();
+            } else {
+                // System.Threading.Thread.Sleep(500);
+                nextCycle = false;
+                new System.Threading.ManualResetEvent(false).WaitOne(500);
+            }
         }
     }
 
-    public void turn() {
+    // TODO: test wih Parallel.ForEach
+    // note paralellism overhead
 
+    //  Parallel.ForEach(Population, p =>
+    //  {
+    //      //Your stuff
+    //  });
+
+    // potential to run foreach(demo d in demografics) {foreach Person p in d }
+
+    public void turn() {
+        market.StartTimeSpan();
+        foreach(Person p in Population) {
+            p.turn();
+        }
+        market.EndTimeSpan();
     }
 
 
@@ -70,6 +105,34 @@ class Simulation {
         Console.WriteLine(type.ToString() + "\t" + stopwatch.Elapsed.TotalMilliseconds.ToString());
     }
 
+    // process key
+    void processKey(ConsoleKeyInfo key) {
+        switch(key.Key) {
+            // escape : close game
+            case ConsoleKey.Escape:
+                continueSim = false;
+                break;
+            // S : stop nontop
+            case ConsoleKey.S:
+                nonStop = false;
+                break;
+            // A : start nonstop
+            case ConsoleKey.A:
+                nonStop = true;
+                break;
+            // D : run one turn
+            case ConsoleKey.D:
+                nextCycle = true;
+                break;
+            default:
+                // not implemented
+                break; 
+        }
+    }
+
+    // singleton reference
+    public static Simulation SimInstance { get; private set; }
+
     public Simulation(int ammountPerProf) {
         // get professions from enum at compile
         profAmmount = Enum.GetNames(typeof(Profession)).Length;
@@ -82,8 +145,6 @@ class Simulation {
         market = new Market(profAmmount);
 
     }
-    // singleton reference
-    public static Simulation SimInstance { get; private set; }
 
 
 
