@@ -1,7 +1,7 @@
 using System;
 class Offer {
     // weakreference to Seller. cannot be set
-    private WeakReference<Person> _seller;
+    WeakReference<Person> _seller;
     public Person Seller {
         get {
             Person seller;

@@ -13,8 +13,9 @@ class Market {
     // TODO return enum. completed/partially completed/not completed
     public int searchOffer(Person buyer, int resourceID, int buyAmmount, int maxPrice) {
         OrderBook book = Orderbooks[resourceID];
+        decimal price = book.HeadNode.Price;
 
-        while(buyAmmount > 0 && book.HeadNode.Price <= maxPrice && book.HeadNode != null) {
+        while(buyAmmount > 0 && price <= maxPrice && book.HeadNode != null) {
             int offerAmmount = book.HeadNode.AmmountResource;
             int transAmmount;
             Person seller = book.HeadNode.Seller;
@@ -29,14 +30,16 @@ class Market {
                 book.HeadNode.consumeOffer(buyAmmount);
             }
 
-            decimal totalCost = book.HeadNode.Price*transAmmount;
+            decimal totalCost = price*transAmmount;
             buyer.Transaction((-1)*totalCost, resourceID, transAmmount);
             seller.Transaction(totalCost, resourceID, transAmmount);
+
+            TimeSpan.LogTransaction(price, transAmmount);
         }
         if(buyAmmount == 0) {
             // completed
             return 0;
-        } else if(book.HeadNode.Price > maxPrice) {
+        } else if(price > maxPrice) {
             // partially completed
             return 1;
         } else if(book.HeadNode == null) {
