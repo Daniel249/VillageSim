@@ -23,8 +23,10 @@ namespace EconSim
             // Offer a = Sim.market.searchOffer(2,1,3,10);
             Console.WriteLine(stop.Elapsed.TotalMilliseconds.ToString());
             //Console.SetCursorPosition(0,0);
-            Console.WriteLine("bye");
             Sim.run();
+
+            Console.SetCursorPosition(0, 0);
+            Console.WriteLine("bye");
             Console.ReadKey(true);
         }
     }
