@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 class Market {
+
     OrderBook Orderbook;
     public List<TimeSpan> Logs { get; private set; }
     public TimeSpan CurrentLog { get; private set; } 
@@ -14,13 +16,22 @@ class Market {
 
 
     // TODO return enum. completed/partially completed/not completed
-    public int searchOffer(Person buyer, int resourceID, int buyAmmount, int maxPrice) {
+    public int searchOffer(Person buyer, int resourceID, int buyAmmount, decimal maxPrice) {
+        if(Orderbook.HeadNode == null) {
+            return 2;
+        }
         decimal price = Orderbook.HeadNode.Price;
 
-        while(buyAmmount > 0 && price <= maxPrice && Orderbook.HeadNode != null) {
+        while(buyAmmount > 0 && Orderbook.HeadNode != null && price <= maxPrice ) {
+            // delete all lowest offer with dead seller
+            Person seller = Orderbook.HeadNode.Seller;
+            if(seller == null) {
+                Orderbook.deleteLowestOffer();
+                continue;
+            }
+
             int offerAmmount = Orderbook.HeadNode.AmmountResource;
             int transAmmount;
-            Person seller = Orderbook.HeadNode.Seller;
 
             if(offerAmmount < buyAmmount) {
                 transAmmount = offerAmmount;
@@ -29,14 +40,13 @@ class Market {
             } else {
                 transAmmount = buyAmmount;
                 buyAmmount = 0;
-                Orderbook.HeadNode.consumeOffer(buyAmmount);
+                Orderbook.HeadNode.consumeOffer(transAmmount);
             }
 
-            decimal totalCost = price*transAmmount;
-            buyer.Transaction((-1)*totalCost, resourceID, transAmmount);
-            seller.Transaction(totalCost, resourceID, transAmmount);
-
-            CurrentLog.LogTransaction(price, transAmmount);
+            bool continueSearch = closeDeal(buyer, seller, price, transAmmount, resourceID);
+            // if(!continueSearch) {
+            //     return 1;
+            // }
         }
         if(buyAmmount == 0) {
             // completed
@@ -50,6 +60,31 @@ class Market {
         } else {
             throw new NotSupportedException();
         }
+    }
+
+    bool closeDeal(Person buyer, Person seller, decimal price, int ammount, int resourceID) {
+        decimal totalCost = price*ammount;
+        if(buyer.Cash >= totalCost && seller.Inventory[resourceID] >= ammount) {
+            buyer.Transaction((-1)*totalCost, resourceID, ammount);
+            seller.Transaction(totalCost, resourceID, (-1)*ammount);
+
+            CurrentLog.LogTransaction(price, ammount, totalCost);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public decimal getLastPrice() {
+        decimal num = CurrentLog.High;
+        
+        // check logs from last until Close != 0
+        int i = Logs.Count;
+        while(num == 0) {
+            num = Logs[i - 1].High;
+            i--;
+        }
+        return num;
     }
 
     // place all current logs in their respective logs
