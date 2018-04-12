@@ -23,8 +23,8 @@ class Lumberjack : Person {
     }
 
     protected override void considerBuy() {
-        decimal woodPrice = Simulation.SimInstance.Markets[(int)Profession.Lumberjack].getLastPrice();
-        Market toolMarket = Simulation.SimInstance.Markets[(int)Profession.Blacksmith];
+        decimal woodPrice = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Lumberjack].getLastPrice();
+        Market toolMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Blacksmith];
 
         toolMarket.searchOffer(this, (int)Profession.Blacksmith, 1, woodPrice*15);
 

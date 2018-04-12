@@ -37,7 +37,7 @@ abstract class Person {
     // sell logic
     // always sells produced
     protected virtual void considerSell() {
-        Market resourceMarket = Simulation.SimInstance.Markets[(int)Role];
+        Market resourceMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Role];
         decimal resourcePrice = resourceMarket.getLastPrice();
         int randomNum = rnd.Next(-3, 4);
         decimal randomPrice = decimal.Divide(randomNum, 20) + resourcePrice;
@@ -50,7 +50,7 @@ abstract class Person {
     // buy logic
     // implementation for food
     protected virtual void considerBuy() {
-        Market foodMarket = Simulation.SimInstance.Markets[(int)Profession.Farmer];
+        Market foodMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Farmer];
         if(Inventory[(int)Profession.Farmer] < 2) {
             decimal lastLogPrice = foodMarket.getLastPrice();
 
@@ -66,7 +66,7 @@ abstract class Person {
     // check for death
     protected void checkBankrupcy() {
         if(Inventory[(int)Profession.Farmer] < 0) {
-            Simulation.SimInstance.DeadPeople.Add(this);
+            ((VillageSim)(Simulation.SimInstance)).DeadPeople.Add(this);
         }
     }
     // set inventory. on respawn only
@@ -76,7 +76,7 @@ abstract class Person {
 
     // constructor
     protected Person() {
-        Inventory = new int[Simulation.SimInstance.profAmmount];
+        Inventory = new int[((VillageSim)(Simulation.SimInstance)).profAmmount];
         // gift food and wood to everyone
         int gift = rnd.Next(3, 7);
         if(Role != Profession.Farmer) {

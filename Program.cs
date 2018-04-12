@@ -10,7 +10,7 @@ namespace EconSim
             Console.WriteLine("Hello World!");
             //Console.Clear();
             //Simulation Sim = new Simulation(100,100,2,2);
-            Simulation Sim = new Simulation(800);
+            VillageSim Sim = new VillageSim(800);
             Random rnd = new Random();
             Stopwatch stop = new Stopwatch();
             stop.Start();

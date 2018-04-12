@@ -24,8 +24,8 @@ class Miner : Person {
     }
 
     protected override void considerBuy() {
-        decimal orePrice = Simulation.SimInstance.Markets[(int)Profession.Miner].getLastPrice();
-        Market toolMarket = Simulation.SimInstance.Markets[(int)Profession.Blacksmith];
+        decimal orePrice = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Miner].getLastPrice();
+        Market toolMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Blacksmith];
 
         toolMarket.searchOffer(this, (int)Profession.Blacksmith, 1, orePrice*15);
 

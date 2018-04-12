@@ -24,9 +24,9 @@ class Farmer : Person {
     }
 
     protected override void considerBuy() {
-        Market woodMarket = Simulation.SimInstance.Markets[(int)Profession.Lumberjack];
-        Market toolMarket = Simulation.SimInstance.Markets[(int)Profession.Blacksmith];
-        decimal foodPrice = Simulation.SimInstance.Markets[(int)Profession.Farmer].getLastPrice();
+        Market woodMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Lumberjack];
+        Market toolMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Blacksmith];
+        decimal foodPrice = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Farmer].getLastPrice();
         // buy wood
         if(Inventory[(int)Profession.Lumberjack] < 3) {
             woodMarket.searchOffer(this, (int)Profession.Lumberjack, 2, foodPrice*2);

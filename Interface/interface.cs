@@ -21,7 +21,7 @@ class Interface {
     // constructor
     public static void initInterface() {
         Console.Clear();
-        int profAmmount = Simulation.SimInstance.profAmmount;
+        int profAmmount = ((VillageSim)(Simulation.SimInstance)).profAmmount;
         
         savedData = new DataPanels(15, 5, profAmmount);
         currentData = new DataPanels(15, 15, profAmmount);
