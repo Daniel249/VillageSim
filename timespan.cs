@@ -13,10 +13,11 @@ class TimeSpan {
     public decimal High { get; private set; }
     public decimal Low { get; private set; }
 
-    public int Volume { get; private set; }
+    public int ResourceVolume { get; private set; }
+    public decimal CurrencyVolume { get; private set; }
 
 
-    public void LogTransaction(decimal price, int volume) {
+    public void LogTransaction(decimal price, int resVolume, decimal curVolume) {
 
         // Log open close
         if(Open == 0) {
@@ -31,7 +32,8 @@ class TimeSpan {
             Low = price;
         }
         // Log volume
-        Volume += volume;
+        ResourceVolume += resVolume;
+        CurrencyVolume += curVolume;
     }
 
 
