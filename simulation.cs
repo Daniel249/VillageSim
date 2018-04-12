@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-// using System.Linq;
+using System.Linq;
 using System.Diagnostics;
 
 class Simulation {
@@ -15,36 +15,62 @@ class Simulation {
     // market
     public Market[] Markets { get; private set; }
 
-
+    // run control
     public bool continueSim { get; set; }
-    public bool nonStop { get; set; }
-    bool nextCycle = false;
+    public bool nonStopTurns { get; set; }
+    bool nextTurn = false;
     public void run() {
         Stopwatch watch = new Stopwatch();
+        LogSetup(2, 2, 2, 5);
+        Interface.initInterface();
+        initMoneySupply();
+
         continueSim = true;
-        nonStop = false;
+        nonStopTurns = false;
 
         while(continueSim) {
             if(Console.KeyAvailable) {
                 processKey(Console.ReadKey(true));
             }
-            if(nonStop) {
-                nextCycle = true;
+            if(nonStopTurns) {
+                nextTurn = true;
             }
             // reset nextCycle before turn and sleep
             // so that it wont be overturned
-            if(nextCycle) {
-                nextCycle = false;
-                Console.WriteLine("turn");
+            if(nextTurn) {
+                nextTurn = false;
+                // Console.WriteLine("turn");
                 turn();
             } else {
                 // System.Threading.Thread.Sleep(500);
-                nextCycle = false;
+                nextTurn = false;
                 new System.Threading.ManualResetEvent(false).WaitOne(500);
             }
         }
     }
 
+    // gift first money to exist
+    void initMoneySupply() {
+        foreach(Person p in Population) {
+            p.Transaction(10m, 0, 0);
+        }
+    }
+
+    void LogSetup(params int[] defaultPrice) {
+        for(int i = 0; i < defaultPrice.Length; i++) {
+            // initialize first fake log
+            Markets[i].StartTimeSpan();
+            TimeSpan fakeLog =  Markets[i].CurrentLog;
+            // log fake transaction
+            decimal price = (decimal)defaultPrice[i];
+            int resourceVolume = 1;
+            decimal currencyVolume = price*resourceVolume; 
+            
+            fakeLog.LogTransaction(price, resourceVolume, currencyVolume);
+            // store fake log
+            Markets[i].EndTimeSpan();
+        }
+    }
     // TODO: test wih Parallel.ForEach
     // note paralellism overhead
 
@@ -55,16 +81,39 @@ class Simulation {
 
     // potential to run foreach(demo d in demografics) {foreach Person p in d }
 
+    // TODO individual person turn control
+    public bool nextPerson;
+
     public void turn() {
+        // start new log
         for(int i = 0; i < Markets.Length; i++) {
             Markets[i].StartTimeSpan();
         }
+        // turn
         foreach(Person p in Population) {
             p.turn();
         }
-        for(int i = 0; i < Markets.Length; i++) {
+        // respawn death row people
+        foreach(Person p in DeadPeople) {
+            RespawnPerson(p);
+        }
+        // update current DataPanels. BEFORE endTimeSpan, else currents return null
+        Interface.updateCurrentData(getCurrentLogs());
+        // store current logs
+        for(int i = 0; i < Markets.Length; i++) {    
             Markets[i].EndTimeSpan();
         }
+        // determine most profitable
+        decimal currentHighest_perCapita = 0m;
+        for(int i = 0; i < Markets.Length; i++) {
+            // CurrencyVolume / Demographic.Count > currentHighest
+            if(Markets[i].Logs.LastOrDefault().CurrencyVolume / Demographics[i].Count > currentHighest_perCapita) {
+                currentHighest_perCapita = Markets[i].Logs.LastOrDefault().CurrencyVolume / Demographics[i].Count;
+                
+                currentProfitable = (Profession)i;
+            }
+        }
+        DeadPeople.Clear();
     }
 
 
@@ -81,19 +130,9 @@ class Simulation {
     void initProfession(int professionID, int Ammount) {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        Type type = null;
-        try {
-            // cast the current proffesion
-            Profession prof = (Profession)professionID;
-            // cast it to type
-            type = Type.GetType(prof.ToString());
-        } catch (Exception e) {
-            Console.WriteLine("Error: Could not cast Profession");
-            Console.WriteLine("Log: Happened in {0}-ava Profession", ((Profession)professionID).ToString());
-            Console.WriteLine(e);
-        }
 
-
+        Type type = getProfession(professionID);
+        
         for(int j = 0; j < Ammount; j++) {
             try {
                 Person temp = (Person)Activator.CreateInstance(type);
@@ -109,6 +148,72 @@ class Simulation {
         Console.WriteLine(type.ToString() + "\t" + stopwatch.Elapsed.TotalMilliseconds.ToString());
     }
 
+    Type getProfession(int professionID) {
+        Type type = null;
+        try {
+            // cast the current proffesion
+            Profession prof = (Profession)professionID;
+            // cast it to type
+            type = Type.GetType(prof.ToString());
+        } catch (Exception e) {
+            Console.WriteLine("Error: Could not cast Profession");
+            Console.WriteLine("Log: Happened in {0}-ava Profession", ((Profession)professionID).ToString());
+            Console.WriteLine(e);
+        }
+        return type;
+    }
+
+
+    // Persons on death row
+    public List<Person> DeadPeople = new List<Person>();
+    public Profession currentProfitable = 0;
+    public void RespawnPerson(Person person) {
+        Population.Remove(person);
+        Demographics[(int)person.Role].Remove(person);
+        HashSet<Person> wealthiest = null;
+
+        // can be swaped by the method below to determine wealthiest
+        Type type = getProfession((int)currentProfitable);
+        // set wealthiest and check extinction
+        wealthiest = Demographics[(int)currentProfitable];
+        for(int i = 0; i < Demographics.Length; i++) {
+            // check for extinction
+            if(Demographics[i].Count < 100) {
+                wealthiest = Demographics[i];
+                break;
+            }
+        }
+
+
+        // method below
+
+        // store current wealthiest
+        // decimal currentWealth = 0;
+        // // for each demographic
+        // for(int i = 0; i < Demographics.Length; i++) {
+        //     // check for extinction
+        //     if(Demographics[i].Count < 100) {
+        //         wealthiest = Demographics[i];
+        //         break;
+        //     }
+        //     // for each person
+        //     decimal cashSum = 0;
+        //     foreach(Person p in Demographics[i]) {
+        //         cashSum += p.Cash;
+        //     }
+        //     decimal num = decimal.Divide(cashSum, Demographics[i].Count);
+        //     if(currentWealth < num) {
+        //         currentWealth = num;
+        //         wealthiest = Demographics[i];
+        //     }
+        // }
+        // Type type = getProfession(Array.IndexOf(Demographics, wealthiest));
+
+        Person temp = (Person)Activator.CreateInstance(type);
+        wealthiest.Add(temp);
+        Population.Add(temp);
+    }
+
     // process key
     void processKey(ConsoleKeyInfo key) {
         switch(key.Key) {
@@ -118,20 +223,34 @@ class Simulation {
                 break;
             // S : stop nontop
             case ConsoleKey.S:
-                nonStop = false;
+                nonStopTurns = false;
                 break;
             // A : start nonstop
             case ConsoleKey.A:
-                nonStop = true;
+                nonStopTurns = true;
                 break;
             // D : run one turn
             case ConsoleKey.D:
-                nextCycle = true;
+                nextTurn = true;
+                break;
+            case ConsoleKey.F:
+                Interface.storeCurrent();
                 break;
             default:
                 // not implemented
                 break; 
         }
+    }
+
+    // get each market's current Logs
+    TimeSpan[] getCurrentLogs() {
+        TimeSpan[] logs = new TimeSpan[profAmmount];
+
+        for(int i = 0; i < profAmmount; i++) {
+            logs[i] = Markets[i].CurrentLog;
+        }
+
+        return logs;
     }
 
     // singleton reference
