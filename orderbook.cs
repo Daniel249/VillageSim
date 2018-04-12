@@ -36,7 +36,7 @@ class OrderBook {
 
 
 
-    static int maxSize = 6000;
+    static int maxSize = 2000;
     // if OfferAmmount surpasses maxSize, cut size to maxSize/2
     void CutBook() {
         if(OfferAmmount > maxSize) {
