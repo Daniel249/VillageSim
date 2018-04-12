@@ -82,8 +82,8 @@ class Simulation {
     // potential to run foreach(demo d in demografics) {foreach Person p in d }
 
     // TODO individual person turn control
-    public bool nextPerson;
 
+    // public bool nextPerson;
     public void turn() {
         // start new log
         for(int i = 0; i < Markets.Length; i++) {
@@ -234,7 +234,7 @@ class Simulation {
                 nextTurn = true;
                 break;
             case ConsoleKey.F:
-                Interface.storeCurrent();
+                Interface.storeCurrentData();
                 break;
             default:
                 // not implemented

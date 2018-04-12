@@ -25,8 +25,6 @@ namespace EconSim
             //Console.SetCursorPosition(0,0);
             Sim.run();
 
-            Console.SetCursorPosition(0, 0);
-            Console.WriteLine("bye");
             Console.ReadKey(true);
         }
     }

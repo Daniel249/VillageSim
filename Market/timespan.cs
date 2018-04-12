@@ -36,6 +36,16 @@ class TimeSpan {
         CurrencyVolume += curVolume;
     }
 
+    // copy values from another TimeSpan
+    public void CopyLog(TimeSpan timeSpan) {
+        Open = timeSpan.Open;
+        Close = timeSpan.Close;
+        High = timeSpan.High;
+        Low = timeSpan.Low;
+        ResourceVolume = timeSpan.ResourceVolume;
+        CurrencyVolume = timeSpan.CurrencyVolume;
+    }
+
 
     // constructor
     public TimeSpan() {

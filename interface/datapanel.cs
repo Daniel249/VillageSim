@@ -12,6 +12,9 @@ class DataPanels {
     public void UpdatePrint(TimeSpan[] timespan) {
         logs = timespan;
         for(int i = 0; i < timespan.Length; i++) {
+            // copy timespans to logs
+            logs[i].CopyLog(timespan[i]);
+            // print data
             panels[i].PrintText(((Profession)i).ToString(), (int)Stats.Class);
             panels[i].PrintText(timespan[i].Open.ToString("#.##"), (int)Stats.Open);
             panels[i].PrintText(timespan[i].Close.ToString("#.##"), (int)Stats.Close);

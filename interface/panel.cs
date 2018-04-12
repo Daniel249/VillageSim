@@ -4,8 +4,6 @@ class Panel {
     int Location_x;
     int Location_y;
 
-    int Current_y;
-
 
     public void PrintText(string text, int current, ConsoleColor fcolor, ConsoleColor bcolor) {
         Console.SetCursorPosition(Location_x, Location_y + current);
@@ -24,7 +22,5 @@ class Panel {
     public Panel(int loc_x, int loc_y) {
         Location_x = loc_x;
         Location_y = loc_y;
-
-        Current_y = 0;
     }
 }
