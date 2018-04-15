@@ -33,7 +33,7 @@ class Market {
             int offerAmmount = Orderbook.HeadNode.AmmountResource;
             int transAmmount;
 
-            if(offerAmmount < buyAmmount) {
+            if(offerAmmount <= buyAmmount) {
                 transAmmount = offerAmmount;
                 buyAmmount -= offerAmmount;
                 Orderbook.deleteLowestOffer();
@@ -87,6 +87,18 @@ class Market {
         return num;
     }
 
+    public decimal getLastPrice(out int how) {
+        decimal num = CurrentLog.High;
+        how = 0;
+        // check logs from last until Close != 0
+        int i = Logs.Count;
+        while(num == 0) {
+            num = Logs[i - 1].High;
+            i--;
+            how++;
+        }
+        return num;
+    }
     // place all current logs in their respective logs
     public void EndTimeSpan() {
         Logs.Add(CurrentLog);
