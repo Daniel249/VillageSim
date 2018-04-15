@@ -22,6 +22,7 @@ class TimeSpan {
         // Log open close
         if(Open == 0) {
             Open = price;
+            Low = price;
         }
         Close = price;
         // Log high low

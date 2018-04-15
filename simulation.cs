@@ -13,7 +13,7 @@ abstract class Simulation {
     public bool nonStopTurns { get; set; }
     bool nextTurn = false;
     public void run() {
-        SimSetUp();
+        SimSetup();
 
         continueSim = true;
         nonStopTurns = false;
@@ -40,7 +40,7 @@ abstract class Simulation {
     }
 
     // set up simulation
-    protected abstract void SimSetUp();
+    protected abstract void SimSetup();
 
     // main method on run()
     protected abstract void turn();
