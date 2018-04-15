@@ -13,6 +13,13 @@ class VillageSim : Simulation {
     public HashSet<Person> Population { get; private set; }
     public HashSet<Person>[] Demographics { get; private set; }
 
+    // lost money on death
+    decimal lostCash;
+
+    // money per person
+    decimal MoneySupply;
+    decimal currentMoneySupply;
+
     // market
     public Market[] Markets { get; private set; }
 
@@ -38,10 +45,14 @@ class VillageSim : Simulation {
         foreach(Person p in Population) {
             p.turn();
         }
+        // print data
+        Interface.printDems();
         // respawn death row people
-        foreach(Person p in DeadPeople) {
-            RespawnPerson(p);
-        }
+        // foreach(Person p in DeadPeople) {
+        //     lostCash += p.Cash;
+        //     RespawnPerson(p);
+        // }
+        RespawnBankruptPeople();
         // update current DataPanels. BEFORE endTimeSpan, else currents return null
         Interface.updateCurrentData(getCurrentLogs());
         // store current logs
@@ -49,25 +60,27 @@ class VillageSim : Simulation {
             Markets[i].EndTimeSpan();
         }
         // determine most profitable
-        decimal currentHighest_perCapita = 0m;
-        for(int i = 0; i < Markets.Length; i++) {
-            // CurrencyVolume / Demographic.Count > currentHighest
-            if(Markets[i].Logs.LastOrDefault().CurrencyVolume / Demographics[i].Count > currentHighest_perCapita) {
-                currentHighest_perCapita = Markets[i].Logs.LastOrDefault().CurrencyVolume / Demographics[i].Count;
+        // decimal currentHighest_perCapita = 0m;
+        // for(int i = 0; i < Markets.Length; i++) {
+        //     // CurrencyVolume / Demographic.Count > currentHighest
+        //     if(Markets[i].Logs.LastOrDefault().CurrencyVolume / Demographics[i].Count > currentHighest_perCapita) {
+        //         currentHighest_perCapita = Markets[i].Logs.LastOrDefault().CurrencyVolume / Demographics[i].Count;
                 
-                currentProfitable = (Profession)i;
-            }
-        }
+        //         currentProfitable = (Profession)i;
+        //     }
+        // }
         DeadPeople.Clear();
     }
 
 
     // Set up
-
-    protected override void SimSetUp() {
+    protected override void SimSetup() {
         FakeLogSetup(3, 3, 3, 5);
         Interface.initInterface();
-        initMoneySupply();
+        // use given moneysupply and re initialize to total money supply
+        initMoneySupply(MoneySupply);
+        MoneySupply = MoneySupply*Population.Count;
+        currentMoneySupply = MoneySupply;
     }
 
     // save a first log
@@ -102,21 +115,26 @@ class VillageSim : Simulation {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        Type type = getProfession(professionID);
+        // Type type = getProfession(professionID);
+        Profession prof = (Profession)professionID;
         
         for(int j = 0; j < Ammount; j++) {
-            try {
-                Person temp = (Person)Activator.CreateInstance(type);
-                Population.Add(temp);
-                Demographics[professionID].Add(temp);
-            } catch (Exception e) {
-                Console.WriteLine("Error: Could not initialize Person from type");
-                Console.WriteLine(e);
-            }
+            // try {
+            //     Person temp = (Person)Activator.CreateInstance(type);
+            //     Population.Add(temp);
+            //     Demographics[professionID].Add(temp);
+            // } catch (Exception e) {
+            //     Console.WriteLine("Error: Could not initialize Person from type");
+            //     Console.WriteLine(e);
+            // }
+            Person temp = prof.ToPerson();
+            Population.Add(temp);
+            Demographics[professionID].Add(temp);
         }
         // test
-        Console.WriteLine(type.ToString() + "\t" + stopwatch.Elapsed.TotalMilliseconds.ToString());
+        Console.WriteLine(prof.ToString() + "\t" + stopwatch.Elapsed.TotalMilliseconds.ToString());
     }
+
     // helper : cast int to Person type
     Type getProfession(int professionID) {
         Type type = null;
@@ -134,9 +152,9 @@ class VillageSim : Simulation {
     }
 
     // gift first money to exist
-    void initMoneySupply() {
+    void initMoneySupply(decimal num) {
         foreach(Person p in Population) {
-            p.Transaction(10m, 0, 0);
+            p.Transaction(num, 0, 0);
         }
     }
 
@@ -147,22 +165,53 @@ class VillageSim : Simulation {
     // Persons on death row
     public List<Person> DeadPeople = new List<Person>();
     public Profession currentProfitable = 0;
+    void RespawnBankruptPeople() {
+        // divide number of bankrupt people in profAmmount ammount of integer parts
+        int [] afterDiv = Helper.IntegerDivision(DeadPeople.Count, profAmmount);
+
+        for(int i = 0; i < DeadPeople.Count; i++) {
+            // delete person references
+            Person person = DeadPeople[i];
+            Population.Remove(person);
+            Demographics[(int)person.Role].Remove(person);
+            lostCash += person.Cash;
+        }
+        
+        for(int prof = 0; prof < afterDiv.Length; prof++) {
+            for(int i = 0; i < afterDiv[prof]; i++) {
+                
+                // check money supply
+                decimal cash = 0;
+                if(lostCash > 10) {
+                    lostCash -= 10;
+                    cash = 10;
+                }
+                // initialize new person
+                // Person temp = (Person)Activator.CreateInstance(type);
+                Person temp = ((Profession)prof).ToPerson();
+                temp.Transaction(cash, 0, 0);
+                // create references
+                Demographics[prof].Add(temp);
+                Population.Add(temp);
+            }
+        }
+
+    }
     public void RespawnPerson(Person person) {
         Population.Remove(person);
         Demographics[(int)person.Role].Remove(person);
-        HashSet<Person> wealthiest = null;
+        int wealthiestID = (int)currentProfitable;
 
         // can be swaped by the method below to determine wealthiest
-        Type type = getProfession((int)currentProfitable);
         // set wealthiest and check extinction
-        wealthiest = Demographics[(int)currentProfitable];
         for(int i = 0; i < Demographics.Length; i++) {
             // check for extinction
             if(Demographics[i].Count < 100) {
-                wealthiest = Demographics[i];
+                wealthiestID = i;
                 break;
             }
         }
+        // Type type = getProfession((wealthiestID));
 
 
         // method below
@@ -189,8 +238,18 @@ class VillageSim : Simulation {
         // }
         // Type type = getProfession(Array.IndexOf(Demographics, wealthiest));
 
-        Person temp = (Person)Activator.CreateInstance(type);
-        wealthiest.Add(temp);
+        // keep money supply
+        decimal cash = 0;
+        if(lostCash > 10) {
+            lostCash -= 10;
+            cash = 10;
+        }
+
+        // Person temp = (Person)Activator.CreateInstance(type);
+        Person temp = ((Profession)wealthiestID).ToPerson();
+        temp.Transaction(cash, 0, 0);
+        
+        Demographics[wealthiestID].Add(temp);
         Population.Add(temp);
     }
 
@@ -205,13 +264,14 @@ class VillageSim : Simulation {
     }
 
     // constructor
-    public VillageSim(int ammountPerProf) {
+    public VillageSim(int ammountPerProf, decimal moneysupply) {
         // get professions from enum at compile
         profAmmount = Enum.GetNames(typeof(Profession)).Length;
         SimInstance = this;
         
         Population = new HashSet<Person>();
         Demographics = new HashSet<Person>[profAmmount];
+        MoneySupply = moneysupply;
 
         initPopulation(ammountPerProf);
         Markets = new Market[profAmmount];
@@ -220,28 +280,29 @@ class VillageSim : Simulation {
         }
     }
 
-    // extra functionality to specify the ammount of each profession, 
-    //instead of same for every profession
 
-    // constructor
-    public VillageSim(params int[] ammountPerProf) {
-        // get professions from enum at compile
-        profAmmount = Enum.GetNames(typeof(Profession)).Length;
-        // add inputs and initialize array
-        Population = new HashSet<Person>();
-        Demographics = new HashSet<Person>[profAmmount];
-        // use inputs to initilize population
-        initPopulation(ammountPerProf);
-    }
+    // // extra functionality to specify the ammount of each profession, 
+    // //instead of same for every profession
 
-    // initialize Persons in array
-    void initPopulation(int[] ammountPerProf) {
-        if(ammountPerProf.Length < profAmmount) {
-            Console.WriteLine("Error: not enough inputs");
-        } else {
-            for(int i = 0; i < profAmmount; i++) {
-                initProfession(i, ammountPerProf[i]);
-            }
-        }
-    }
+    // // constructor
+    // public VillageSim(params int[] ammountPerProf) {
+    //     // get professions from enum at compile
+    //     profAmmount = Enum.GetNames(typeof(Profession)).Length;
+    //     // add inputs and initialize array
+    //     Population = new HashSet<Person>();
+    //     Demographics = new HashSet<Person>[profAmmount];
+    //     // use inputs to initilize population
+    //     initPopulation(ammountPerProf);
+    // }
+
+    // // initialize Persons in array
+    // void initPopulation(int[] ammountPerProf) {
+    //     if(ammountPerProf.Length < profAmmount) {
+    //         Console.WriteLine("Error: not enough inputs");
+    //     } else {
+    //         for(int i = 0; i < profAmmount; i++) {
+    //             initProfession(i, ammountPerProf[i]);
+    //         }
+    //     }
+    // }
  }
