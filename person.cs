@@ -37,12 +37,17 @@ abstract class Person {
     // sell logic
     // always sells produced
     protected virtual void considerSell() {
+
         Market resourceMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Role];
-        decimal resourcePrice = resourceMarket.getLastPrice();
-        int randomNum = rnd.Next(-3, 4);
-        decimal randomPrice = decimal.Divide(randomNum, 20) + resourcePrice;
-        if(randomPrice < 0.1m) {
-            randomPrice = 0.1m;
+        int searchDelay;
+        decimal resourcePrice = resourceMarket.getLastPrice(out searchDelay);
+        int randomNum = rnd.Next(-3, 9);
+        if(randomNum < -1) {
+            randomNum = -1;
+        }
+        decimal randomPrice = decimal.Divide(randomNum, 20) + resourcePrice - searchDelay*0.5m;
+        if(randomPrice < 0.2m) {
+            randomPrice = 0.2m;
         }
         resourceMarket.placeOffer(this, Inventory[(int)Role],randomPrice);
     }
@@ -78,10 +83,11 @@ abstract class Person {
     protected Person() {
         Inventory = new int[((VillageSim)(Simulation.SimInstance)).profAmmount];
         // gift food and wood to everyone
-        int gift = rnd.Next(3, 7);
+        int gift = rnd.Next(2, 5);
         if(Role != Profession.Farmer) {
             Inventory[(int)Profession.Farmer] = gift;
         }
         Inventory[(int)Profession.Lumberjack] = gift;
+        Inventory[(int)Profession.Miner] = gift;
     }
 }
