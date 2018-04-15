@@ -7,29 +7,36 @@ class DataPanels {
     List<Panel> panels;
     public TimeSpan[] logs { get; private set; }
 
-    static int panelSize = 10;
+    static int panelSize = 15;
+    static int stringSize = 10;
     
     public void UpdatePrint(TimeSpan[] timespan) {
         logs = timespan;
         for(int i = 0; i < timespan.Length; i++) {
+            TimeSpan current = timespan[i];
             // copy timespans to logs
-            logs[i].CopyLog(timespan[i]);
+            logs[i].CopyLog(current);
             // print data
             panels[i].PrintText(((Profession)i).ToString(), (int)Stats.Class);
-            panels[i].PrintText(timespan[i].Open.ToString("#.##"), (int)Stats.Open);
-            panels[i].PrintText(timespan[i].Close.ToString("#.##"), (int)Stats.Close);
-            panels[i].PrintText(timespan[i].High.ToString("#.##"), (int)Stats.High);
-            panels[i].PrintText(timespan[i].Low.ToString("#.##"), (int)Stats.Low);
-            panels[i].PrintText(timespan[i].ResourceVolume.ToString(), (int)Stats.ResourceVol);
-            panels[i].PrintText(timespan[i].CurrencyVolume.ToString("#.##"), (int)Stats.CurrencyVol);
+            panels[i].PrintText(normalizeString(current.Open.ToString("#.##")), (int)Stats.Open);
+            panels[i].PrintText(normalizeString(current.Close.ToString("#.##")), (int)Stats.Close);
+            panels[i].PrintText(normalizeString(current.High.ToString("#.##")), (int)Stats.High);
+            panels[i].PrintText(normalizeString(current.Low.ToString("#.##")), (int)Stats.Low);
+            panels[i].PrintText(normalizeString(current.ResourceVolume.ToString()), (int)Stats.ResourceVol);
+            panels[i].PrintText(normalizeString(current.CurrencyVolume.ToString("#.##")), (int)Stats.CurrencyVol);
             decimal averagePrice;
             try {
-                averagePrice = timespan[i].CurrencyVolume / timespan[i].ResourceVolume;
+                averagePrice = current.CurrencyVolume / current.ResourceVolume;
             } catch {
                 averagePrice = 0m;
             }
-            panels[i].PrintText(averagePrice.ToString("#.##"), (int)Stats.Close);
+            panels[i].PrintText(normalizeString(averagePrice.ToString("#.##")), (int)Stats.Close);
         }
+    }
+
+    string normalizeString(string msg) {
+        int rest = stringSize - msg.Length;
+        return msg + new String(' ', rest);
     }
 
     
