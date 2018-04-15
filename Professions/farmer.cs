@@ -8,8 +8,14 @@ class Farmer : Person {
         }
     }
     public override void work() {
+        Inventory[(int)Profession.Farmer] -= 1;
+
+        if(Inventory[(int)Profession.Farmer] >= 6) {
+            return;
+        }
+
         if(Inventory[(int)Profession.Lumberjack] >= 2) {
-            Inventory[(int)Profession.Lumberjack] -= 1;
+            Inventory[(int)Profession.Lumberjack] -= 2;
             if(Inventory[(int)Profession.Blacksmith] > 0) {
                 Inventory[(int)Profession.Farmer] += 3;
                 // chance of breaking
@@ -21,7 +27,6 @@ class Farmer : Person {
                 Inventory[(int)Profession.Farmer] += 2;
             }
         }
-        Inventory[(int)Profession.Farmer] -= 1;
     }
 
     protected override void considerBuy() {
@@ -33,7 +38,7 @@ class Farmer : Person {
             woodMarket.searchOffer(this, (int)Profession.Lumberjack, 2, foodPrice*2);
         }
         // buy tools
-        if(Inventory[(int)Profession.Blacksmith] < 1) {
+        if(Inventory[(int)Profession.Blacksmith] == 0) {
             toolMarket.searchOffer(this, (int)Profession.Blacksmith, 1, foodPrice*4);
         }
     }

@@ -9,6 +9,11 @@ class Miner : Person {
     }
 
     public override void work() {
+        Inventory[(int)Profession.Farmer]--;
+
+        if(Inventory[(int)Profession.Miner] >= 6) {
+            return;
+        }
 
         if(Inventory[(int)Profession.Blacksmith] > 0) {
             Inventory[(int)Profession.Miner] += 3;
@@ -20,14 +25,15 @@ class Miner : Person {
         } else {
             Inventory[(int)Profession.Miner] += 2;
         }
-        Inventory[(int)Profession.Farmer]--;
     }
 
     protected override void considerBuy() {
         decimal orePrice = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Miner].getLastPrice();
         Market toolMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Blacksmith];
 
-        toolMarket.searchOffer(this, (int)Profession.Blacksmith, 1, orePrice*4);
+        if(Inventory[(int)Profession.Blacksmith] == 0) {
+            toolMarket.searchOffer(this, (int)Profession.Blacksmith, 1, orePrice*4);
+        }
 
         base.considerBuy();
     }
