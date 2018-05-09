@@ -1,7 +1,8 @@
 using System;
 using System.Linq;
 class Farmer : Person {
-
+    static int woodMultiplier = 2;
+    static int inventorySize = 6;
     public override Profession Role { 
         get {
             return Profession.Farmer;
@@ -10,12 +11,12 @@ class Farmer : Person {
     public override void work() {
         Inventory[(int)Profession.Farmer] -= 1;
 
-        if(Inventory[(int)Profession.Farmer] >= 6) {
+        if(Inventory[(int)Profession.Farmer] >= inventorySize) {
             return;
         }
 
-        if(Inventory[(int)Profession.Lumberjack] >= 2) {
-            Inventory[(int)Profession.Lumberjack] -= 2;
+        if(Inventory[(int)Profession.Lumberjack] >= woodMultiplier) {
+            Inventory[(int)Profession.Lumberjack] -= woodMultiplier;
             if(Inventory[(int)Profession.Blacksmith] > 0) {
                 Inventory[(int)Profession.Farmer] += 3;
                 // chance of breaking
@@ -35,13 +36,19 @@ class Farmer : Person {
         decimal foodPrice = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Farmer].getLastPrice();
         // buy wood
         if(Inventory[(int)Profession.Lumberjack] < 3) {
-            woodMarket.searchOffer(this, (int)Profession.Lumberjack, 2, foodPrice*2);
+            woodMarket.searchOffer(this, (int)Profession.Lumberjack, 2, foodPrice/2 + 0.5m);
         }
         // buy tools
         if(Inventory[(int)Profession.Blacksmith] == 0) {
             toolMarket.searchOffer(this, (int)Profession.Blacksmith, 1, foodPrice*4);
         }
     }
+
+    // protected override void considerSell() {
+    //     Market foodMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Farmer];
+    //     decimal woodPrice = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Lumberjack].getLastPrice();
+    //     foodMarket.placeOffer(this, Inventory[(int)Profession.Farmer], woodPrice*2)
+    // }
 
     // protected override void considerSell() {}
 
