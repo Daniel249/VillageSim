@@ -30,11 +30,12 @@ class Lumberjack : Person {
         decimal woodPrice = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Lumberjack].getLastPrice();
         Market toolMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Blacksmith];
 
+        base.considerBuy();
+        
         if(Inventory[(int)Profession.Blacksmith] == 0) {
             toolMarket.searchOffer(this, (int)Profession.Blacksmith, 1, woodPrice*4);
         }
 
-        base.considerBuy();
     }
 
     // constructor 
