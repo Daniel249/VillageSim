@@ -38,7 +38,7 @@ abstract class Person {
     // always sells produced
     protected virtual void considerSell() {
 
-        Market resourceMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Role];
+        RTMarket resourceMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Role];
         int searchDelay;
         decimal resourcePrice = resourceMarket.getLastPrice(out searchDelay);
         int randomNum = rnd.Next(-3, 9);
@@ -55,7 +55,7 @@ abstract class Person {
     // buy logic
     // implementation for food
     protected virtual void considerBuy() {
-        Market foodMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Farmer];
+        RTMarket foodMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Farmer];
         if(Inventory[(int)Profession.Farmer] < 2) {
             decimal lastLogPrice = foodMarket.getLastPrice();
 

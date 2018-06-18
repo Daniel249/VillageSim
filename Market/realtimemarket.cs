@@ -1,7 +1,10 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-class Market {
+
+// In Real Time Market
+// offers affect the market state immediately
+class RTMarket {
 
     OrderBook Orderbook;
     public List<TimeSpan> Logs { get; private set; }
@@ -109,7 +112,7 @@ class Market {
     }
 
     // constructor
-    public Market(int resourceAmmount) {
+    public RTMarket(int resourceAmmount) {
         // initialize orderbook
         Orderbook = new OrderBook();
         // initialize log

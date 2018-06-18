@@ -21,9 +21,9 @@ class Blacksmith : Person {
     }
 
     protected override void considerBuy() {
-        Market woodMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Lumberjack];
-        Market oreMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Miner];
-        Market toolMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Blacksmith];
+        RTMarket woodMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Lumberjack];
+        RTMarket oreMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Miner];
+        RTMarket toolMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Blacksmith];
 
         decimal productionCosts = 1*(woodMarket.getLastPrice() + oreMarket.getLastPrice());
 

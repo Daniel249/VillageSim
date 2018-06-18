@@ -21,7 +21,7 @@ class VillageSim : Simulation {
     decimal currentMoneySupply;
 
     // market
-    public Market[] Markets { get; private set; }
+    public RTMarket[] Markets { get; private set; }
 
     // TODO: test wih Parallel.ForEach
     // note paralellism overhead
@@ -274,9 +274,9 @@ class VillageSim : Simulation {
         MoneySupply = moneysupply;
 
         initPopulation(ammountPerProf);
-        Markets = new Market[profAmmount];
+        Markets = new RTMarket[profAmmount];
         for(int i = 0; i < profAmmount; i++) {
-            Markets[i] = new Market(profAmmount);
+            Markets[i] = new RTMarket(profAmmount);
         }
     }
 
