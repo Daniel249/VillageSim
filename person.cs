@@ -36,20 +36,43 @@ abstract class Person {
 
     // sell logic
     // always sells produced
+    // cycle through under/exact/over pricing
+    int currentCycleValue = 0;
+
+    // cycle goes from (1 - cycleOffset) to (cycleSize - cycleOffset)
+    int cycleSize = 7;
+    int cycleOffset = 4;
     protected virtual void considerSell() {
+        int ammountResource = Inventory[(int)Role];
+        if(ammountResource <= 1) {
+            return;
+        }
 
         RTMarket resourceMarket = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Role];
+
+        // last price comes with how long it took to find. 0 trade days mean lower price.
         int searchDelay;
-        decimal resourcePrice = resourceMarket.getLastPrice(out searchDelay);
-        int randomNum = rnd.Next(-3, 9);
-        if(randomNum < -1) {
-            randomNum = -1;
-        }
-        decimal randomPrice = decimal.Divide(randomNum, 20) + resourcePrice - searchDelay*0.5m;
+        //decimal resourcePrice = resourceMarket.getLastPrice(out searchDelay);
+
+        decimal resourcePrice = resourceMarket._getLastPrice(out searchDelay) + 0.5m;
+
+        // // old random offset from last price
+        // int randomNum = rnd.Next(-3, 9);
+        // if(randomNum < -1) {
+        //     randomNum = -1;
+        // }
+
+        // random number cycles
+        int randomNum = currentCycleValue - cycleOffset;
+        currentCycleValue = (currentCycleValue + 1) % cycleSize;
+
+        // decimal randomPrice = decimal.Divide(randomNum, 20) + resourcePrice - searchDelay*0.5m;
+        decimal randomPrice = decimal.Divide(randomNum, 5) + resourcePrice - searchDelay*0.5m;
+  
         if(randomPrice < 0.2m) {
             randomPrice = 0.2m;
         }
-        resourceMarket.placeOffer(this, Inventory[(int)Role],randomPrice);
+        resourceMarket.placeOffer(this, ammountResource, randomPrice);
     }
 
     // buy logic
@@ -64,7 +87,7 @@ abstract class Person {
                 buyAmmount = 3;
             }
             // buy max possible ammount or 3 at 0.1 more than market price
-            foodMarket.searchOffer(this, (int)Profession.Farmer, buyAmmount, lastLogPrice+0.1m);
+            foodMarket.searchOffer(this, (int)Profession.Farmer, buyAmmount, lastLogPrice+10m);
         }
     }
 
@@ -80,14 +103,37 @@ abstract class Person {
     }
 
     // constructor
+    // free materials
+
     protected Person() {
         Inventory = new int[((VillageSim)(Simulation.SimInstance)).profAmmount];
         // gift food and wood to everyone
-        int gift = rnd.Next(2, 5);
+        int gift = rnd.Next(0, 4);
         if(Role != Profession.Farmer) {
             Inventory[(int)Profession.Farmer] = gift;
+        } else {
+            Inventory[(int)Profession.Farmer] = 1;
         }
         Inventory[(int)Profession.Lumberjack] = gift;
         Inventory[(int)Profession.Miner] = gift;
+        
+        // initialize current position in cycle
+        gift = rnd.Next(0, cycleSize + 1);
+        currentCycleValue = gift;
     }
+
+    // free money
+    // protected Person() {
+    //     Inventory = new int[((VillageSim)(Simulation.SimInstance)).profAmmount];
+    //     // gift food and wood to everyone
+    //     int gift = rnd.Next(2, 5);
+    //     if(Role != Profession.Farmer) {
+    //         Inventory[(int)Profession.Farmer] = gift;
+    //     }
+    //     Cash = 10m;
+
+    //     // initialize current position in cycle
+    //     gift = rnd.Next(0, cycleSize + 1);
+    //     currentCycleValue = gift;
+    // }
 }
