@@ -13,8 +13,6 @@ class VillageSim : Simulation {
     public HashSet<Person> Population { get; private set; }
     public HashSet<Person>[] Demographics { get; private set; }
 
-    // lost money on death
-    decimal lostCash;
 
     // money per person
     decimal MoneySupply;
@@ -75,7 +73,7 @@ class VillageSim : Simulation {
 
     // Set up
     protected override void SimSetup() {
-        FakeLogSetup(3, 3, 3, 5);
+        FakeLogSetup(10, 5, 3, 10);
         Interface.initInterface();
         // use given moneysupply and re initialize to total money supply
         initMoneySupply(MoneySupply);
@@ -174,16 +172,16 @@ class VillageSim : Simulation {
             Person person = DeadPeople[i];
             Population.Remove(person);
             Demographics[(int)person.Role].Remove(person);
-            lostCash += person.Cash;
+            // lostCash += person.Cash;
+            currentMoneySupply -= person.Cash;
         }
-        
         for(int prof = 0; prof < afterDiv.Length; prof++) {
             for(int i = 0; i < afterDiv[prof]; i++) {
                 
                 // check money supply
                 decimal cash = 0;
-                if(lostCash > 10) {
-                    lostCash -= 10;
+                if(MoneySupply - currentMoneySupply > 10) {
+                    currentMoneySupply += 10;
                     cash = 10;
                 }
                 // initialize new person
@@ -196,61 +194,6 @@ class VillageSim : Simulation {
             }
         }
 
-    }
-    public void RespawnPerson(Person person) {
-        Population.Remove(person);
-        Demographics[(int)person.Role].Remove(person);
-        int wealthiestID = (int)currentProfitable;
-
-        // can be swaped by the method below to determine wealthiest
-        // set wealthiest and check extinction
-        for(int i = 0; i < Demographics.Length; i++) {
-            // check for extinction
-            if(Demographics[i].Count < 100) {
-                wealthiestID = i;
-                break;
-            }
-        }
-        // Type type = getProfession((wealthiestID));
-
-
-        // method below
-
-        // store current wealthiest
-        // decimal currentWealth = 0;
-        // // for each demographic
-        // for(int i = 0; i < Demographics.Length; i++) {
-        //     // check for extinction
-        //     if(Demographics[i].Count < 100) {
-        //         wealthiest = Demographics[i];
-        //         break;
-        //     }
-        //     // for each person
-        //     decimal cashSum = 0;
-        //     foreach(Person p in Demographics[i]) {
-        //         cashSum += p.Cash;
-        //     }
-        //     decimal num = decimal.Divide(cashSum, Demographics[i].Count);
-        //     if(currentWealth < num) {
-        //         currentWealth = num;
-        //         wealthiest = Demographics[i];
-        //     }
-        // }
-        // Type type = getProfession(Array.IndexOf(Demographics, wealthiest));
-
-        // keep money supply
-        decimal cash = 0;
-        if(lostCash > 10) {
-            lostCash -= 10;
-            cash = 10;
-        }
-
-        // Person temp = (Person)Activator.CreateInstance(type);
-        Person temp = ((Profession)wealthiestID).ToPerson();
-        temp.Transaction(cash, 0, 0);
-        
-        Demographics[wealthiestID].Add(temp);
-        Population.Add(temp);
     }
 
     // interface helper: get each market's current Logs
