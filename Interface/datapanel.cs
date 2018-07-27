@@ -30,7 +30,7 @@ class DataPanels {
             } catch {
                 averagePrice = 0m;
             }
-            panels[i].PrintText(normalizeString(averagePrice.ToString("#.##")), (int)Stats.Close);
+            panels[i].PrintText(normalizeString(averagePrice.ToString("#.##")), (int)Stats.AveragePrice);
         }
     }
 
