@@ -13,6 +13,8 @@ $RECYCLE.BIN/
 /bin/*
 /obj/*
 /.vscode/*
+/.vs/*
+*.dgml
 *.csproj
 *exe
 # Windows Installer files
