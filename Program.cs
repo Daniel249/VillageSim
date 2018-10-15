@@ -7,7 +7,7 @@ namespace EconSim
     {
         static void Main(string[] args)
         {
-            VillageSim Sim = new VillageSim(2000, 100);
+            VillageSim Sim = new VillageSim(2000, 15);
             Sim.run();
 
             Console.ReadKey(true);

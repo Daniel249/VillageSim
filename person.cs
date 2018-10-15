@@ -120,6 +120,7 @@ abstract class Person {
         // initialize current position in cycle
         gift = rnd.Next(0, cycleSize + 1);
         currentCycleValue = gift;
+        //Cash += 2;
     }
 
     // free money

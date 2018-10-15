@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 class Farmer : Person {
     static int woodMultiplier = 2;
-    static int inventorySize = 6;
+    static int inventorySize = 3;
     public override Profession Role { 
         get {
             return Profession.Farmer;
@@ -27,6 +27,8 @@ class Farmer : Person {
             } else {
                 Inventory[(int)Profession.Farmer] += 2;
             }
+        // } else {
+        //     Inventory[(int)Profession.Farmer] += 1;
         }
     }
 
@@ -36,7 +38,7 @@ class Farmer : Person {
         decimal foodPrice = ((VillageSim)(Simulation.SimInstance)).Markets[(int)Profession.Farmer].getLastPrice();
         // buy wood
         if(Inventory[(int)Profession.Lumberjack] < 3) {
-            woodMarket.searchOffer(this, (int)Profession.Lumberjack, 2, foodPrice/2 + 0.5m);
+            woodMarket.searchOffer(this, (int)Profession.Lumberjack, 2, foodPrice);
         }
         // buy tools
         if(Inventory[(int)Profession.Blacksmith] == 0) {
