@@ -13,6 +13,7 @@ class RTMarket {
     // NOTE: resourceID is used to place the offer on the respective orderbook
 
     public void placeOffer(Person Seller, int Ammount, decimal Price) {
+        CurrentLog.ResourceSupply += Ammount;
         Offer newOffer = new Offer(Seller, Ammount, Price);
         Orderbook.addOffer(newOffer);
     }
@@ -20,6 +21,9 @@ class RTMarket {
 
     // TODO return enum. completed/partially completed/not completed
     public int searchOffer(Person buyer, int resourceID, int buyAmmount, decimal maxPrice) {
+
+        CurrentLog.ResourceDemand += buyAmmount;
+
         if(Orderbook.HeadNode == null) {
             return 2;
         }
@@ -101,6 +105,31 @@ class RTMarket {
             how++;
         }
         return num;
+    }
+
+    // use saved price if there's a skip
+    decimal savedPrice = 0m;
+    public decimal _getLastPrice(out int how) {
+        decimal lastCurrencyVol = Logs.Last().CurrencyVolume;
+        decimal lastResourceVol = Logs.Last().ResourceVolume;
+
+        decimal lastPrice;
+        how = 0;
+        if(lastCurrencyVol == 0m || lastResourceVol == 0m) {
+            lastPrice = getLastPrice(out how);
+        } else {
+            lastPrice = Math.Round(lastCurrencyVol / lastResourceVol, 2);
+        }
+
+        return lastPrice;
+    }
+
+    public bool getRatio() {
+        if(CurrentLog.ResourceSupply > CurrentLog.ResourceDemand) {
+            return false;
+        } else {
+            return true;
+        }
     }
     // place all current logs in their respective logs
     public void EndTimeSpan() {

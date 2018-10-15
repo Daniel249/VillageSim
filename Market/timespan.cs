@@ -16,6 +16,8 @@ class TimeSpan {
     public int ResourceVolume { get; private set; }
     public decimal CurrencyVolume { get; private set; }
 
+    public int ResourceSupply { get; set; }
+    public int ResourceDemand { get; set; }
 
     public void LogTransaction(decimal price, int resVolume, decimal curVolume) {
 
